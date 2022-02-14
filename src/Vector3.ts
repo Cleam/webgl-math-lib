@@ -114,44 +114,4 @@ export default class Vector3 {
     const z = x1 * y2 - x2 * y1;
     return new Vector3(x, y, z);
   }
-  // 初始化 4 阶单位矩阵
-  // 1 0 0 0
-  // 0 1 0 0
-  // 0 0 1 0
-  // 0 0 0 1
-  static identity(target?: Float32Array) {
-    target = target || new Float32Array(16);
-    // 第一列
-    target[0] = 1;
-    target[1] = 0;
-    target[2] = 0;
-    target[3] = 0;
-    // 第二列
-    target[4] = 0;
-    target[5] = 1;
-    target[6] = 0;
-    target[7] = 0;
-    // 第三列
-    target[8] = 0;
-    target[9] = 0;
-    target[10] = 1;
-    target[11] = 0;
-    // 第四列
-    target[12] = 0;
-    target[13] = 0;
-    target[14] = 0;
-    target[15] = 1;
-    return target;
-  }
-  // 另一种实现方式
-  // static identity() {
-  //   // prettier-ignore
-  //   const m = [
-  //     1, 0, 0, 0, // 第一列
-  //     0, 1, 0, 0, // 第二列
-  //     0, 0, 1, 0, // 第三列
-  //     0, 0, 0, 1  // 第四列
-  //   ]
-  //   return new Float32Array(m);
-  // }
 }

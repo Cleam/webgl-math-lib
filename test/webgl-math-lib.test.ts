@@ -2,9 +2,9 @@ import wml from '../src/webgl-math-lib';
 const { Vector3 } = wml;
 
 /**
- * Dummy test
+ * Vector3 test
  */
-describe('Dummy test', () => {
+describe('Vector3 test', () => {
   it('Vector3 constructor is ok', () => {
     const vec1 = new Vector3(1, 2, 3);
     expect(vec1.x).toBe(1);
@@ -26,5 +26,13 @@ describe('Dummy test', () => {
     expect(vec.x).toBe(4);
     expect(vec.y).toBe(5);
     expect(vec.z).toBe(6);
+  });
+
+  it('Vector3 methods', () => {
+    const vec = new Vector3(1, 1, 1);
+    vec.normalize();
+    expect(vec.x).toBe(1 / Math.sqrt(3));
+    expect(vec.y).toBe(1 / Math.sqrt(3));
+    expect(vec.z).toBe(1 / Math.sqrt(3));
   });
 });
