@@ -1,11 +1,12 @@
+import Vector3 from './Vector3';
+
 export default class Matrix4 {
   // 初始化 4 阶单位矩阵
   // 1 0 0 0
   // 0 1 0 0
   // 0 0 1 0
   // 0 0 0 1
-  static identity(target?: Float32Array) {
-    target = target || new Float32Array(16);
+  static identity(target: Float32Array = new Float32Array(16)) {
     // 第一列
     target[0] = 1;
     target[1] = 0;
@@ -68,8 +69,7 @@ export default class Matrix4 {
    * @param target 将结果存入 target 数组。
    * @returns 返回相加后的新矩阵。
    */
-  static add(m1: Float32Array, m2: Float32Array, target?: Float32Array) {
-    target = target || new Float32Array(16);
+  static add(m1: Float32Array, m2: Float32Array, target: Float32Array = new Float32Array(16)) {
     for (let i = 0; i < m1.length; i++) {
       target[i] = m1[i] + m2[i];
     }
@@ -82,16 +82,18 @@ export default class Matrix4 {
    * @param target 将结果存入 target 数组。
    * @returns 返回相减后的新矩阵。
    */
-  static sub(m1: Float32Array, m2: Float32Array, target?: Float32Array) {
-    target = target || new Float32Array(16);
+  static sub(m1: Float32Array, m2: Float32Array, target: Float32Array = new Float32Array(16)) {
     for (let i = 0; i < m1.length; i++) {
       target[i] = m1[i] - m2[i];
     }
     return target;
   }
 
-  static multiply(next: Float32Array, prev: Float32Array, target?: Float32Array) {
-    target = target || new Float32Array(16);
+  static multiply(
+    next: Float32Array,
+    prev: Float32Array,
+    target: Float32Array = new Float32Array(16)
+  ) {
     // 第一列
     const p00 = prev[0];
     const p10 = prev[1];
@@ -179,8 +181,7 @@ export default class Matrix4 {
    * @param target 接收转置矩阵
    * @returns 转置矩阵
    */
-  static transpose(m: Float32Array, target?: Float32Array) {
-    target = target || new Float32Array(16);
+  static transpose(m: Float32Array, target: Float32Array = new Float32Array(16)) {
     // 第一列
     target[0] = m[0];
     target[1] = m[4];
@@ -215,8 +216,7 @@ export default class Matrix4 {
    *  determinant: 矩阵行列式
    * }
    */
-  static det(m: Float32Array, cofactor?: Float32Array) {
-    cofactor = cofactor || new Float32Array(16);
+  static det(m: Float32Array, cofactor: Float32Array = new Float32Array(16)) {
     // 第一列
     const p00 = m[0];
     const p01 = m[1];
@@ -338,9 +338,7 @@ export default class Matrix4 {
    * @param target 接收目标矩阵的逆矩阵
    * @returns 逆矩阵
    */
-  static inverse(m: Float32Array, target?: Float32Array) {
-    target = target || new Float32Array(16);
-
+  static inverse(m: Float32Array, target: Float32Array = new Float32Array(16)) {
     // 行列式和代数余子式矩阵
     const { determinant, algebraicCofactor } = Matrix4.det(m);
 
@@ -358,6 +356,249 @@ export default class Matrix4 {
     for (let i = 0; i < transpose.length; i++) {
       target[i] = (transpose[i] * 1) / determinant;
     }
+
+    return target;
+  }
+
+  /**
+   * 矩阵平移
+   * @param tx x轴平移
+   * @param ty y轴平移
+   * @param tz z轴平移
+   * @param target 接收平移矩阵
+   * @returns 平移矩阵
+   */
+  static translation(
+    tx: number,
+    ty: number,
+    tz: number,
+    target: Float32Array = new Float32Array(16)
+  ) {
+    // WebGL 矩阵是列主序，所以这里的矩阵是列主序
+    // 第一列
+    target[0] = 1;
+    target[1] = 0;
+    target[2] = 0;
+    target[3] = 0;
+    // 第二列
+    target[4] = 0;
+    target[5] = 1;
+    target[6] = 0;
+    target[7] = 0;
+    // 第三列
+    target[8] = 0;
+    target[9] = 0;
+    target[10] = 1;
+    target[11] = 0;
+    // 第四列
+    target[12] = tx;
+    target[13] = ty;
+    target[14] = tz;
+    target[15] = 0;
+
+    return target;
+  }
+
+  /**
+   * 矩阵缩放
+   * @param tx x轴平移
+   * @param ty y轴平移
+   * @param tz z轴平移
+   * @param target 接收缩放矩阵
+   * @returns 缩放矩阵
+   */
+  static scale(sx: number, sy: number, sz: number, target: Float32Array = new Float32Array(16)) {
+    // 第一列
+    target[0] = sx;
+    target[1] = 0;
+    target[2] = 0;
+    target[3] = 0;
+
+    // 第二列
+    target[4] = 0;
+    target[5] = sy;
+    target[6] = 0;
+    target[7] = 0;
+
+    // 第三列
+    target[8] = 0;
+    target[9] = 0;
+    target[10] = sz;
+    target[11] = 0;
+
+    // 第四列
+    target[12] = 0;
+    target[13] = 0;
+    target[14] = 0;
+    target[15] = 1;
+
+    return target;
+  }
+  // X轴缩放
+  static scaleX(sx: number) {
+    return Matrix4.scale(sx, 1, 1);
+  }
+  // Y轴缩放
+  static scaleY(sy: number) {
+    return Matrix4.scale(1, sy, 1);
+  }
+  // Z轴缩放
+  static scaleZ(sz: number) {
+    return Matrix4.scale(1, 1, sz);
+  }
+
+  /**
+   * X轴旋转
+   * @param angle 旋转角度
+   * @param target 接收旋转矩阵
+   * @returns 旋转矩阵
+   */
+  static rotationX(angle: number, target = new Float32Array(16)) {
+    let sin = Math.sin(angle);
+    let cos = Math.cos(angle);
+    target[0] = 1;
+    target[1] = 0;
+    target[2] = 0;
+    target[3] = 0;
+
+    target[4] = 0;
+    target[5] = cos;
+    target[6] = sin;
+    target[7] = 0;
+
+    target[8] = 0;
+    target[9] = -sin;
+    target[10] = cos;
+    target[11] = 0;
+
+    target[12] = 0;
+    target[13] = 0;
+    target[14] = 0;
+    target[15] = 1;
+
+    // 矩阵（列主序存储）
+    // 1 0 0 0
+    // 0 cos -sin 0
+    // 0 sin cos 0
+    // 0 0 0 1
+    return target;
+  }
+
+  /**
+   * Y轴旋转
+   * @param angle 旋转角度
+   * @param target 接收旋转矩阵
+   * @returns 旋转矩阵
+   */
+  static rotationY(angle: number, target = new Float32Array(16)) {
+    let sin = Math.sin(angle);
+    let cos = Math.cos(angle);
+    target[0] = cos;
+    target[1] = 0;
+    target[2] = -sin;
+    target[3] = 0;
+
+    target[4] = 0;
+    target[5] = 1;
+    target[6] = 0;
+    target[7] = 0;
+
+    target[8] = sin;
+    target[9] = 0;
+    target[10] = cos;
+    target[11] = 0;
+
+    target[12] = 0;
+    target[13] = 0;
+    target[14] = 0;
+    target[15] = 1;
+
+    // 矩阵（列主序存储）
+    // cos 0 sin 0
+    // 0 1 0 0
+    // -sin 0 cos 0
+    // 0 0 0 1
+    return target;
+  }
+
+  /**
+   * Z轴旋转
+   * @param angle 旋转角度
+   * @param target 接收旋转矩阵
+   * @returns 旋转矩阵
+   */
+  static rotationZ(angle: number, target = new Float32Array(16)) {
+    let sin = Math.sin(angle);
+    let cos = Math.cos(angle);
+    target[0] = cos;
+    target[1] = sin;
+    target[2] = 0;
+    target[3] = 0;
+
+    target[4] = -sin;
+    target[5] = cos;
+    target[6] = 0;
+    target[7] = 0;
+
+    target[8] = 0;
+    target[9] = 0;
+    target[10] = 1;
+    target[11] = 0;
+
+    target[12] = 0;
+    target[13] = 0;
+    target[14] = 0;
+    target[15] = 1;
+
+    // 矩阵（列主序存储）
+    // cos -sin 0 0
+    // sin cos 0 0
+    // 0 0 1 0
+    // 0 0 0 1
+    return target;
+  }
+
+  /**
+   * 绕任意轴旋转
+   * @param axis 旋转轴
+   * @param angle 旋转角度
+   * @param target 接收旋转矩阵
+   * @returns 旋转矩阵
+   */
+  static axisRotation(axis: Vector3, angle: number, target = new Float32Array(16)) {
+    var x = axis.x;
+    var y = axis.y;
+    var z = axis.z;
+    var l = Math.sqrt(x * x + y * y + z * z);
+    x = x / l;
+    y = y / l;
+    z = z / l;
+    var xx = x * x;
+    var yy = y * y;
+    var zz = z * z;
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var oneMCos = 1 - cos;
+
+    target[0] = xx + (1 - xx) * cos;
+    target[1] = x * y * oneMCos + z * sin;
+    target[2] = x * z * oneMCos - y * sin;
+    target[3] = 0;
+
+    target[4] = x * y * oneMCos - z * sin;
+    target[5] = yy + (1 - yy) * cos;
+    target[6] = y * z * oneMCos + x * sin;
+    target[7] = 0;
+
+    target[8] = x * z * oneMCos + y * sin;
+    target[9] = y * z * oneMCos - x * sin;
+    target[10] = zz + (1 - zz) * cos;
+    target[11] = 0;
+
+    target[12] = 0;
+    target[13] = 0;
+    target[14] = 0;
+    target[15] = 1;
 
     return target;
   }
